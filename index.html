@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mijn Weer – Fuengirola &amp; Weert</title>
+<style>
+:root{
+  --bg:#f4f1ea; --kaart:#fffdf8; --rand:#ddd5c4; --tekst:#2b2a27; --zacht:#6b665c;
+  --accent:#1f5f8b; --accent2:#e9f1f7; --kop:#24435c;
+  --warm:#c8501e; --koud:#2a6fb0; --regen:#2f7fbf; --zon:#e0a100;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tekst);font-family:"Segoe UI",Calibri,Arial,sans-serif;font-size:18px;line-height:1.45}
+header{background:var(--kop);color:#fff;padding:14px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header h1{margin:0;font-size:26px;font-weight:600}
+header .sub{opacity:.8;font-size:15px}
+header .rechts{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{font:inherit;font-size:16px;padding:8px 15px;border-radius:8px;border:1px solid #ffffff55;background:#ffffff1f;color:#fff;cursor:pointer}
+button:hover{background:#ffffff33}
+nav{display:flex;gap:4px;padding:0 20px;background:#2f5675;flex-wrap:wrap}
+nav button{background:none;border:none;border-radius:0;color:#dce8f2;font-size:18px;padding:12px 18px;border-bottom:4px solid transparent}
+nav button:hover{color:#fff;background:#ffffff14}
+nav button.actief{color:#fff;border-bottom-color:#f2c14e;font-weight:600}
+main{max-width:1600px;margin:0 auto;padding:20px 22px 50px}
+.kolommen{display:grid;grid-template-columns:repeat(auto-fit,minmax(560px,1fr));gap:20px;align-items:start}
+.kolommen.enkel{grid-template-columns:minmax(0,1fr);max-width:1000px;margin:0 auto}
+.kolommen>section{min-width:0}
+.kaart{background:var(--kaart);border:1px solid var(--rand);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.plaatskop{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.plaatskop h2{margin:0;font-size:26px;color:var(--kop)}
+.plaatskop .land{color:var(--zacht);font-size:16px}
+.plaatskop .tijd{margin-left:auto;color:var(--zacht);font-size:15px}
+.nu{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.nu .ico{font-size:78px;line-height:1}
+.nu .temp{font-size:64px;font-weight:600;line-height:1}
+.nu .oms{font-size:22px;font-weight:600}
+.nu .voelt{color:var(--zacht);font-size:16px}
+.details{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 14px;margin-top:14px}
+.details div{background:#f6f2e9;border-radius:8px;padding:7px 10px}
+.details small{display:block;color:var(--zacht);font-size:13px}
+.details b{font-size:18px}
+h3{font-size:19px;margin:4px 0 10px;color:var(--kop)}
+.uren{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+.uur{flex:0 0 66px;text-align:center;background:#f6f2e9;border-radius:8px;padding:6px 2px;font-size:15px}
+.uur .u{color:var(--zacht);font-size:13px}
+.uur .i{font-size:26px}
+.uur .t{font-weight:600}
+.uur .r{color:var(--regen);font-size:13px}
+.dagen{width:100%;border-collapse:collapse;font-size:17px}
+.dagen td{padding:7px 6px;border-bottom:1px solid #ece5d6;vertical-align:middle}
+.dagen tr:hover td{background:#faf6ee}
+.dagen tr.vandaag td{background:#eef4f9}
+.dagen .dag{white-space:nowrap;width:118px}
+.dagen .dag small{display:block;color:var(--zacht);font-size:13px}
+.dagen .di{font-size:28px;width:44px;text-align:center}
+.dagen .doms{font-size:15px;color:var(--zacht)}
+.dagen .min{color:var(--koud);text-align:right;width:48px}
+.dagen .max{color:var(--warm);font-weight:600;width:48px}
+.dagen .bar{width:28%}
+.balk{position:relative;height:9px;background:#ece5d6;border-radius:5px}
+.balk span{position:absolute;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,#4f8fd0,#f0b030,#d9542a)}
+.dagen .neer{color:var(--regen);font-size:15px;white-space:nowrap;width:92px}
+.dagen .wind{font-size:15px;color:var(--zacht);white-space:nowrap;width:86px}
+.grafiek svg{width:100%;height:auto;display:block}
+.cijfer{display:inline-block;min-width:38px;text-align:center;padding:3px 6px;border-radius:8px;font-weight:700;color:#fff;font-size:17px}
+.dagen .cijf{width:50px;text-align:center}
+.webcam .knoppen{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.webcam a.knop,.webcam button{font:inherit;font-size:16px;padding:8px 15px;border-radius:8px;border:1px solid var(--rand);background:#fff;color:var(--tekst);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.webcam a.knop:hover,.webcam button:hover{background:var(--accent2)}
+.webcam .primair{background:var(--accent);color:#fff;border-color:var(--accent)}
+.webcam .primair:hover{background:#174a6d}
+.webcam input{font:inherit;font-size:16px;padding:7px 10px;border:1px solid #c9c0ad;border-radius:7px;flex:1;min-width:260px}
+.webcam .voorbeeld{position:relative;display:block;max-width:860px;border-radius:10px;overflow:hidden;background:#000}
+.webcam .voorbeeld img{width:100%;display:block;opacity:.92}
+.webcam .voorbeeld .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:76px;color:#fff;text-shadow:0 2px 12px #000}
+.webcam .speler{position:relative;max-width:860px;aspect-ratio:16/9}
+.webcam .speler iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px}
+.melding{background:#fbe4e2;color:#b3261e;border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.info{background:var(--accent2);border-radius:10px;padding:10px 14px;font-size:15px;color:var(--kop);margin-bottom:14px}
+footer{text-align:center;color:var(--zacht);font-size:14px;padding:10px}
+footer a{color:var(--accent)}
+.laden{color:var(--zacht);padding:30px;text-align:center}
+@media (max-width:640px){.kolommen{grid-template-columns:1fr}.dagen .doms,.dagen .wind{display:none}}
+@media print{header,nav,footer{display:none}body{background:#fff}.kaart{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>☀️ Mijn Weer</h1>
+  <span class="sub">Actueel weer en 14-daagse verwachting – zonder reclame</span>
+  <div class="rechts">
+    <span id="bijgewerkt" class="sub"></span>
+    <button onclick="haalAlles(true)" title="Nu opnieuw ophalen">🔄 Vernieuwen</button>
+  </div>
+</header>
+<nav id="nav">
+  <button data-w="beide" class="actief">Beide naast elkaar</button>
+  <button data-w="fuengirola">🇪🇸 Fuengirola</button>
+  <button data-w="weert">🇳🇱 Weert</button>
+</nav>
+<main>
+  <div id="melding"></div>
+  <div id="inhoud" class="kolommen"><div class="laden">Weergegevens worden opgehaald…</div></div>
+</main>
+<footer>
+  Weergegevens: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (gratis, geen sleutel nodig, CC BY 4.0).
+  Wordt elke 30 minuten vanzelf bijgewerkt. Zonder internet ziet u de laatst opgehaalde gegevens.
+</footer>
+
+<script>
+/* ---------- Plaatsen ---------- */
+const PLAATSEN=[
+  {id:"fuengirola",naam:"Fuengirola",land:"Costa del Sol, Spanje",vlag:"🇪🇸",lat:36.5398,lon:-4.6247,tz:"Europe/Madrid",zee:true},
+  {id:"weert",naam:"Weert",land:"Limburg, Nederland",vlag:"🇳🇱",lat:51.2517,lon:5.7069,tz:"Europe/Amsterdam",zee:false}
+];
+const OPSLAG="mijnweer-v1";
+let DATA={}; // per plaats: {weer, zee, tijd}
+let weergave="beide";
+
+/* ---------- Weercodes (WMO) ---------- */
+const CODES={
+  0:["Onbewolkt","☀️","🌙"],1:["Overwegend zonnig","🌤️","🌙"],2:["Half bewolkt","⛅","☁️"],3:["Bewolkt","☁️","☁️"],
+  45:["Mist","🌫️","🌫️"],48:["Mist met rijp","🌫️","🌫️"],
+  51:["Lichte motregen","🌦️","🌧️"],53:["Motregen","🌦️","🌧️"],55:["Dichte motregen","🌧️","🌧️"],
+  56:["Ijzel (licht)","🌧️","🌧️"],57:["Ijzel","🌧️","🌧️"],
+  61:["Lichte regen","🌦️","🌧️"],63:["Regen","🌧️","🌧️"],65:["Zware regen","🌧️","🌧️"],
+  66:["Lichte ijzel","🌧️","🌧️"],67:["Zware ijzel","🌧️","🌧️"],
+  71:["Lichte sneeuw","🌨️","🌨️"],73:["Sneeuw","🌨️","🌨️"],75:["Zware sneeuw","❄️","❄️"],77:["Sneeuwkorrels","🌨️","🌨️"],
+  80:["Lichte buien","🌦️","🌧️"],81:["Buien","🌧️","🌧️"],82:["Zware buien","⛈️","⛈️"],
+  85:["Sneeuwbuien","🌨️","🌨️"],86:["Zware sneeuwbuien","❄️","❄️"],
+  95:["Onweer","⛈️","⛈️"],96:["Onweer met hagel","⛈️","⛈️"],99:["Zwaar onweer met hagel","⛈️","⛈️"]
+};
+function code(c,dag=true){const x=CODES[c]||["Onbekend","❔","❔"];return {oms:x[0],ico:dag?x[1]:x[2]};}
+
+/* ---------- Hulpfuncties ---------- */
+const DAGEN=["zo","ma","di","wo","do","vr","za"];
+const DAGEN_LANG=["Zondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrijdag","Zaterdag"];
+const MND=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function r(n){return n==null||isNaN(n)?"–":Math.round(n);}
+function windRichting(g){if(g==null)return "";return ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"][Math.round(g/22.5)%16];}
+function beaufort(kmh){const g=[1,6,12,20,29,39,50,62,75,89,103,118];let b=0;while(b<g.length&&kmh>=g[b])b++;return b;}
+function uvTekst(u){if(u==null)return "–";const t=u<3?"laag":u<6?"matig":u<8?"hoog":u<11?"zeer hoog":"extreem";return (Math.round(u*10)/10).toString().replace(".",",")+" ("+t+")";}
+function uurMin(iso){return iso?iso.slice(11,16):"–";}
+function dagNaam(iso,i){const d=new Date(iso+"T12:00:00");if(i===0)return "Vandaag";if(i===1)return "Morgen";return DAGEN_LANG[d.getDay()];}
+function datumKort(iso){const d=new Date(iso+"T12:00:00");return DAGEN[d.getDay()]+" "+d.getDate()+" "+MND[d.getMonth()];}
+function mm(v){return v==null?"–":(Math.round(v*10)/10).toString().replace(".",",")+" mm";}
+function tijdNu(tz){try{return new Date().toLocaleTimeString("nl-NL",{timeZone:tz,hour:"2-digit",minute:"2-digit"});}catch(e){return "";}}
+
+/* ---------- Ophalen ---------- */
+function weerUrl(p){
+  const q=new URLSearchParams({
+    latitude:p.lat,longitude:p.lon,timezone:p.tz,forecast_days:14,wind_speed_unit:"kmh",
+    current:"temperature_2m,apparent_temperature,relative_humidity_2m,is_day,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+    hourly:"temperature_2m,precipitation_probability,precipitation,weather_code,is_day",
+    daily:"weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset,uv_index_max,sunshine_duration"
+  });
+  return "https://api.open-meteo.com/v1/forecast?"+q;
+}
+function zeeUrl(p){
+  return "https://marine-api.open-meteo.com/v1/marine?"+new URLSearchParams({latitude:p.lat,longitude:p.lon,timezone:p.tz,current:"sea_surface_temperature,wave_height"});
+}
+async function haalJson(url){const res=await fetch(url);if(!res.ok)throw new Error("HTTP "+res.status);return res.json();}
+
+async function haalAlles(handmatig){
+  const fouten=[];
+  await Promise.all(PLAATSEN.map(async p=>{
+    try{
+      const weer=await haalJson(weerUrl(p));
+      let zee=null;
+      if(p.zee){try{zee=await haalJson(zeeUrl(p));}catch(e){}}
+      DATA[p.id]={weer,zee,tijd:Date.now()};
+    }catch(e){fouten.push(p.naam);}
+  }));
+  try{localStorage.setItem(OPSLAG,JSON.stringify(DATA));}catch(e){}
+  const m=document.getElementById("melding");
+  if(fouten.length){
+    const oud=fouten.some(n=>DATA[PLAATSEN.find(p=>p.naam===n).id]);
+    m.innerHTML=`<div class="melding">⚠️ Ophalen mislukt voor ${esc(fouten.join(" en "))}. ${oud?"U ziet de laatst bewaarde gegevens.":"Controleer de internetverbinding en klik op Vernieuwen."}</div>`;
+  }else m.innerHTML="";
+  toon();
+  if(handmatig&&!fouten.length)knipper();
+}
+function knipper(){const b=document.getElementById("bijgewerkt");b.style.color="#f2c14e";setTimeout(()=>b.style.color="",1200);}
+
+/* ---------- Tonen ---------- */
+function toon(){
+  const doel=document.getElementById("inhoud");
+  const lijst=weergave==="beide"?PLAATSEN:PLAATSEN.filter(p=>p.id===weergave);
+  doel.className="kolommen"+(lijst.length===1?" enkel":"");
+  doel.innerHTML=lijst.map(p=>DATA[p.id]?plaatsHtml(p,DATA[p.id]):`<div class="kaart laden">Nog geen gegevens voor ${esc(p.naam)}.</div>`).join("");
+  const tijden=Object.values(DATA).map(d=>d.tijd).filter(Boolean);
+  if(tijden.length){const t=new Date(Math.min(...tijden));document.getElementById("bijgewerkt").textContent="Bijgewerkt om "+t.toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"});}
+}
+
+function plaatsHtml(p,d){
+  const w=d.weer,c=w.current,dl=w.daily;
+  const cc=code(c.weather_code,c.is_day===1);
+  const bft=beaufort(c.wind_speed_10m);
+  const zeeT=d.zee&&d.zee.current?d.zee.current.sea_surface_temperature:null;
+  const golf=d.zee&&d.zee.current?d.zee.current.wave_height:null;
+  const zonUren=dl.sunshine_duration?dl.sunshine_duration[0]/3600:null;
+  let html=`<section>
+  <div class="kaart">
+    <div class="plaatskop"><h2>${p.vlag} ${esc(p.naam)}</h2><span class="land">${esc(p.land)}</span><span class="tijd">Plaatselijke tijd ${tijdNu(p.tz)}</span></div>
+    <div class="nu">
+      <div class="ico">${cc.ico}</div>
+      <div><div class="temp">${r(c.temperature_2m)}°</div></div>
+      <div><div class="oms">${esc(cc.oms)}</div>
+        <div class="voelt">Voelt als ${r(c.apparent_temperature)}° · vandaag ${r(dl.temperature_2m_min[0])}° tot ${r(dl.temperature_2m_max[0])}°</div>
+        <div class="voelt">Kans op neerslag vandaag ${r(dl.precipitation_probability_max[0])}% · ${mm(dl.precipitation_sum[0])}</div>
+      </div>
+    </div>
+    <div class="details">
+      <div><small>Wind</small><b>${windRichting(c.wind_direction_10m)} ${bft} Bft</b> <span class="zacht" style="font-size:14px">(${r(c.wind_speed_10m)} km/u)</span></div>
+      <div><small>Windstoten</small><b>${r(c.wind_gusts_10m)} km/u</b></div>
+      <div><small>Luchtvochtigheid</small><b>${r(c.relative_humidity_2m)}%</b></div>
+      <div><small>Bewolking</small><b>${r(c.cloud_cover)}%</b></div>
+      <div><small>Luchtdruk</small><b>${r(c.pressure_msl)} hPa</b></div>
+      <div><small>UV-index vandaag</small><b>${uvTekst(dl.uv_index_max[0])}</b></div>
+      <div><small>Zon op / onder</small><b>🌅 ${uurMin(dl.sunrise[0])} · ${uurMin(dl.sunset[0])}</b></div>
+      <div><small>Zonuren vandaag</small><b>${zonUren==null?"–":(Math.round(zonUren*10)/10).toString().replace(".",",")+" uur"}</b></div>
+      ${p.zee?`<div><small>Zeewater</small><b>🌊 ${zeeT==null?"–":r(zeeT)+"°"}</b>${golf!=null?` <span class="zacht" style="font-size:14px">golven ${(Math.round(golf*10)/10).toString().replace(".",",")} m</span>`:""}</div>`:""}
+    </div>
+  </div>
+  <div class="kaart"><h3>Komende 24 uur</h3><div class="uren">${urenHtml(w)}</div></div>
+  <div class="kaart grafiek"><h3>Temperatuur komende 14 dagen</h3>${grafiekHtml(dl)}</div>
+  <div class="kaart"><h3>Verwachting 14 dagen</h3>${dagenHtml(dl)}</div>
+  ${p.id==="fuengirola"&&weergave==="fuengirola"?webcamHtml():""}
+  </section>`;
+  return html;
+}
+
+function urenHtml(w){
+  const h=w.hourly,nu=w.current.time.slice(0,13);
+  let start=h.time.findIndex(t=>t.slice(0,13)>=nu);if(start<0)start=0;
+  let s="";
+  for(let i=start;i<Math.min(start+24,h.time.length);i++){
+    const cc=code(h.weather_code[i],h.is_day[i]===1);
+    const kans=h.precipitation_probability[i];
+    s+=`<div class="uur" title="${esc(cc.oms)}"><div class="u">${i===start?"Nu":h.time[i].slice(11,13)+":00"}</div><div class="i">${cc.ico}</div><div class="t">${r(h.temperature_2m[i])}°</div><div class="r">${kans>=10?"💧"+kans+"%":"&nbsp;"}</div></div>`;
+  }
+  return s;
+}
+
+function dagenHtml(dl){
+  const lo=Math.min(...dl.temperature_2m_min),hi=Math.max(...dl.temperature_2m_max),bereik=Math.max(1,hi-lo);
+  let s=`<table class="dagen">`;
+  dl.time.forEach((t,i)=>{
+    const cc=code(dl.weather_code[i]);
+    const links=(dl.temperature_2m_min[i]-lo)/bereik*100,breed=(dl.temperature_2m_max[i]-dl.temperature_2m_min[i])/bereik*100;
+    const kans=dl.precipitation_probability_max[i];
+    s+=`<tr class="${i===0?"vandaag":""}">
+      <td class="dag"><b>${dagNaam(t,i)}</b><small>${datumKort(t)}</small></td>
+      <td class="cijf">${cijferHtml(dl,i)}</td>
+      <td class="di" title="${esc(cc.oms)}">${cc.ico}</td>
+      <td class="doms">${esc(cc.oms)}</td>
+      <td class="min">${r(dl.temperature_2m_min[i])}°</td>
+      <td class="bar"><div class="balk"><span style="left:${links}%;width:${Math.max(breed,3)}%"></span></div></td>
+      <td class="max">${r(dl.temperature_2m_max[i])}°</td>
+      <td class="neer">${kans==null?"":"💧 "+kans+"%"}${dl.precipitation_sum[i]>=0.1?"<br><small>"+mm(dl.precipitation_sum[i])+"</small>":""}</td>
+      <td class="wind">💨 ${windRichting(dl.wind_direction_10m_dominant[i])} ${beaufort(dl.wind_speed_10m_max[i])} Bft</td>
+    </tr>`;
+  });
+  return s+`</table><p class="zacht" style="font-size:14px;margin:8px 0 0"><b>Weercijfer</b> (1–10): hoe prettig het weer is om buiten te zijn – zon, kans op regen, hoeveelheid regen, wind en temperatuur samen. Ga met de muis op een cijfer staan voor de uitleg.<br>Let op: verwachtingen verder dan ongeveer 7 dagen zijn minder betrouwbaar.</p>`;
+}
+
+function grafiekHtml(dl){
+  const n=dl.time.length,W=700,H=230,L=34,R=12,T=18,B=40;
+  const lo=Math.floor(Math.min(...dl.temperature_2m_min)-1),hi=Math.ceil(Math.max(...dl.temperature_2m_max)+1);
+  const x=i=>L+i*(W-L-R)/(n-1),y=v=>T+(hi-v)*(H-T-B)/Math.max(1,hi-lo);
+  const lijn=a=>a.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(v).toFixed(1)).join(" ");
+  const vlak=lijn(dl.temperature_2m_max)+" "+dl.temperature_2m_min.map((v,i)=>"L"+x(n-1-i).toFixed(1)+","+y(dl.temperature_2m_min[n-1-i]).toFixed(1)).join(" ")+"Z";
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Temperatuurgrafiek">`;
+  const stap=hi-lo>20?5:2;
+  for(let v=Math.ceil(lo/stap)*stap;v<=hi;v+=stap){s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#ece5d6"/><text x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#6b665c">${v}°</text>`;}
+  // neerslagkans als staafjes onderaan
+  dl.precipitation_probability_max.forEach((k,i)=>{if(k){const h=k/100*24;s+=`<rect x="${x(i)-5}" y="${H-B-h}" width="10" height="${h}" fill="#2f7fbf" opacity=".25"><title>${k}% kans op neerslag</title></rect>`;}});
+  s+=`<path d="${vlak}" fill="#f0b030" opacity=".15"/>`;
+  s+=`<path d="${lijn(dl.temperature_2m_max)}" fill="none" stroke="#c8501e" stroke-width="2.5"/>`;
+  s+=`<path d="${lijn(dl.temperature_2m_min)}" fill="none" stroke="#2a6fb0" stroke-width="2.5"/>`;
+  dl.time.forEach((t,i)=>{
+    s+=`<circle cx="${x(i)}" cy="${y(dl.temperature_2m_max[i])}" r="3.2" fill="#c8501e"><title>${datumKort(t)}: max ${r(dl.temperature_2m_max[i])}°</title></circle>`;
+    s+=`<circle cx="${x(i)}" cy="${y(dl.temperature_2m_min[i])}" r="3.2" fill="#2a6fb0"><title>${datumKort(t)}: min ${r(dl.temperature_2m_min[i])}°</title></circle>`;
+    const d=new Date(t+"T12:00:00");
+    s+=`<text x="${x(i)}" y="${H-B+16}" font-size="11" text-anchor="middle" fill="#2b2a27">${DAGEN[d.getDay()]}</text><text x="${x(i)}" y="${H-B+30}" font-size="10" text-anchor="middle" fill="#6b665c">${d.getDate()}/${d.getMonth()+1}</text>`;
+  });
+  s+=`<text x="${W-R}" y="12" font-size="12" text-anchor="end"><tspan fill="#c8501e">● max</tspan>   <tspan fill="#2a6fb0">● min</tspan>   <tspan fill="#2f7fbf">▮ kans op neerslag</tspan></text>`;
+  return s+`</svg>`;
+}
+
+/* ---------- Weercijfer ---------- */
+function weerCijfer(dl,i){
+  const c=dl.weather_code[i],kans=dl.precipitation_probability_max[i]||0,neer=dl.precipitation_sum[i]||0;
+  const wind=dl.wind_speed_10m_max[i]||0,tmax=dl.temperature_2m_max[i];
+  const uit=[];let s=10,a;
+  const wolk={0:0,1:.5,2:1.5,3:2.5,45:3,48:3}[c];
+  a=wolk!==undefined?wolk:2.5; if(a){s-=a;uit.push("bewolking −"+a.toString().replace(".",","));}
+  a=Math.round(kans/100*3*10)/10; if(a){s-=a;uit.push("regenkans −"+a.toString().replace(".",","));}
+  a=Math.round(Math.min(3,neer*0.4)*10)/10; if(a){s-=a;uit.push("hoeveelheid regen −"+a.toString().replace(".",","));}
+  if(c>=95){s-=1;uit.push("onweer −1");} else if((c>=71&&c<=77)||c===85||c===86){s-=1;uit.push("sneeuw −1");}
+  a=wind>20?Math.round(Math.min(3,(wind-20)/10)*10)/10:0; if(a){s-=a;uit.push("wind −"+a.toString().replace(".",","));}
+  a=tmax<18?Math.round(Math.min(3,(18-tmax)*0.25)*10)/10:tmax>28?Math.round(Math.min(3,(tmax-28)*0.3)*10)/10:0;
+  if(a){s-=a;uit.push((tmax<18?"koel":"heet")+" −"+a.toString().replace(".",","));}
+  s=Math.max(1,Math.min(10,Math.round(s)));
+  return {cijfer:s,uitleg:uit.length?uit.join(", "):"perfect weer"};
+}
+function cijferHtml(dl,i){
+  const w=weerCijfer(dl,i);
+  const kleur=w.cijfer>=8?"#2e7d4f":w.cijfer>=6?"#6c9a2e":w.cijfer>=4?"#c98a0a":"#b3261e";
+  return `<span class="cijfer" style="background:${kleur}" title="Weercijfer ${w.cijfer}: ${esc(w.uitleg)}">${w.cijfer}</span>`;
+}
+
+/* ---------- Webcam Fuengirola ---------- */
+const WEBCAM_SLEUTEL=OPSLAG+"-webcam";
+function ytId(u){if(!u)return "";const m=String(u).match(/(?:youtu\.be\/|v=|\/live\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:(/^[A-Za-z0-9_-]{11}$/.test(u.trim())?u.trim():"");}
+const STANDAARD_WEBCAM="https://www.youtube.com/watch?v=Eqj5Lb0csUw";
+function webcamLink(){try{const v=localStorage.getItem(WEBCAM_SLEUTEL);return v===null?STANDAARD_WEBCAM:v;}catch(e){return STANDAARD_WEBCAM;}}
+const ONLINE=/^https?:/.test(location.protocol);
+const ONLINE_URL="https://theovanzoest.github.io/weer/";
+let spelerAan=ONLINE;
+function webcamHtml(){
+  const link=webcamLink(),id=ytId(link);
+  let s=`<div class="kaart webcam" id="webcam"><h3>📹 Webcam Fuengirola</h3>`;
+  if(id){
+    s+=spelerAan
+      ?`<div class="speler"><iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+        <p class="zacht" style="font-size:14px">Ziet u “Fout 153” of een zwart scherm? Dan staat YouTube afspelen binnen dit bestand niet toe – klik dan op “Openen op YouTube”.</p>`
+      :`<a class="voorbeeld" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener" title="Klik om de webcam op YouTube te openen"><img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="Webcam Fuengirola"><span class="play">▶</span></a>`;
+    s+=`<div class="knoppen">
+      <a class="knop primair" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">▶ Openen op YouTube</a>
+      <button onclick="spelerAan=!spelerAan;toon();setTimeout(()=>document.getElementById('webcam').scrollIntoView({behavior:'smooth'}),50)">${spelerAan?"⏹ Speler sluiten":"📺 Probeer hier af te spelen"}</button>
+      <button onclick="wijzigWebcam()">✏️ Andere webcam kiezen</button>
+      ${ONLINE?"":`<a class="knop primair" href="${ONLINE_URL}" target="_blank" rel="noopener">🌐 Webcam bekijken in online versie</a>`}
+    </div>`;
+  }else{
+    s+=`<p>Plak hieronder de link van uw favoriete YouTube-webcam van Fuengirola (bijvoorbeeld <span class="zacht">https://www.youtube.com/watch?v=…</span>).
+      Weet u er nog geen? Klik op “Zoeken op YouTube”, open een livestream die u bevalt en kopieer de link uit de adresbalk.</p>
+      <div class="knoppen"><input id="webcamInvoer" type="text" placeholder="Plak hier de YouTube-link"><button class="primair" onclick="bewaarWebcam()">💾 Bewaren</button></div>`;
+  }
+  s+=`<div class="knoppen">
+      <a class="knop" href="https://www.youtube.com/results?search_query=Fuengirola+live+webcam&sp=EgJAAQ%253D%253D" target="_blank" rel="noopener">🔎 Zoeken op YouTube (live)</a>
+      <a class="knop" href="https://meteo365.es/livecams/fuengirola.php" target="_blank" rel="noopener">📷 Webcam Playa Las Gaviotas</a>
+      <a class="knop" href="https://www.windy.com/webcams/fuengirola" target="_blank" rel="noopener">🌍 Webcams op Windy</a>
+    </div></div>`;
+  return s;
+}
+function bewaarWebcam(){
+  const v=document.getElementById("webcamInvoer").value.trim();
+  if(!ytId(v)){alert("Dit lijkt geen geldige YouTube-link. Kopieer de link uit de adresbalk van YouTube en probeer het opnieuw.");return;}
+  try{localStorage.setItem(WEBCAM_SLEUTEL,v);}catch(e){}
+  spelerAan=ONLINE;toon();
+}
+function wijzigWebcam(){
+  if(!confirm("Wilt u een andere webcam-link invullen?"))return;
+  try{localStorage.setItem(WEBCAM_SLEUTEL,"");}catch(e){}
+  spelerAan=ONLINE;toon();
+}
+
+/* ---------- Tabbladen ---------- */
+document.getElementById("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  weergave=b.dataset.w;
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("actief",x===b));
+  try{localStorage.setItem(OPSLAG+"-weergave",weergave);}catch(e){}
+  toon();
+});
+
+/* ---------- Start ---------- */
+try{const w=localStorage.getItem(OPSLAG+"-weergave");if(w){weergave=w;document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("actief",x.dataset.w===w));}}catch(e){}
+try{const o=localStorage.getItem(OPSLAG);if(o){DATA=JSON.parse(o);toon();}}catch(e){}
+haalAlles(false);
+setInterval(()=>haalAlles(false),30*60*1000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){const t=Math.min(...Object.values(DATA).map(d=>d.tijd||0));if(Date.now()-t>15*60*1000)haalAlles(false);}});
+</script>
+</body>
+</html>
