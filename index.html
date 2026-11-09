@@ -37,7 +37,7 @@ main{max-width:1600px;margin:0 auto;padding:20px 22px 50px}
 .nu .oms{font-size:22px;font-weight:600}
 .nu .voelt{color:var(--zacht);font-size:16px}
 .details{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 14px;margin-top:14px}
-.details div{background:#f6f2e9;border-radius:8px;padding:7px 10px}
+.details div{background:#f6f2e9;border-radius:8px;padding:7px 10px;min-height:88px}
 .details small{display:block;color:var(--zacht);font-size:13px}
 .details b{font-size:18px}
 h3{font-size:19px;margin:4px 0 10px;color:var(--kop)}
@@ -231,7 +231,7 @@ function plaatsHtml(p,d){
       <div><small>Windstoten</small><b>${r(c.wind_gusts_10m)} km/u</b></div>
       <div><small>Luchtvochtigheid</small><b>${r(c.relative_humidity_2m)}%</b></div>
       <div><small>Bewolking</small><b>${r(c.cloud_cover)}%</b></div>
-      <div><small>Luchtdruk</small><b>${r(c.pressure_msl)} hPa</b></div>
+      ${p.zee&&weergave==="beide"?"":`<div><small>Luchtdruk</small><b>${r(c.pressure_msl)} hPa</b></div>`}
       <div><small>UV-index vandaag</small><b>${uvTekst(dl.uv_index_max[0])}</b></div>
       <div><small>Zon op / onder</small><b>🌅 ${uurMin(dl.sunrise[0])} · ${uurMin(dl.sunset[0])}</b></div>
       <div><small>Zonuren vandaag</small><b>${zonUren==null?"–":(Math.round(zonUren*10)/10).toString().replace(".",",")+" uur"}</b></div>
