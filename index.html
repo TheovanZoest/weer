@@ -74,6 +74,15 @@ h3{font-size:19px;margin:4px 0 10px;color:var(--kop)}
 .webcam .voorbeeld{position:relative;display:block;max-width:860px;border-radius:10px;overflow:hidden;background:#000}
 .webcam .voorbeeld img{width:100%;display:block;opacity:.92}
 .webcam .voorbeeld .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:76px;color:#fff;text-shadow:0 2px 12px #000}
+.camgroot{display:block;position:relative;max-width:1000px;border-radius:10px;overflow:hidden;background:#1d2a35;aspect-ratio:16/9}
+.camgroot img{width:100%;height:100%;object-fit:cover;display:block}
+.camgroot .label{position:absolute;left:0;right:0;bottom:0;padding:8px 12px;background:linear-gradient(transparent,#000a);color:#fff;font-size:15px;display:flex;justify-content:space-between}
+.camgroot .fout{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#dce8f2;text-align:center;padding:20px}
+.camlijst{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:1000px;margin-top:8px}
+.camlijst button{padding:0;border:3px solid transparent;border-radius:8px;overflow:hidden;background:#1d2a35;cursor:pointer;display:block;color:#fff;font-size:13px}
+.camlijst button.actief{border-color:#f2c14e}
+.camlijst img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.camlijst span{display:block;padding:3px 4px;background:#24435c}
 .webcam .speler{position:relative;max-width:860px;aspect-ratio:16/9}
 .webcam .speler iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px}
 .melding{background:#fbe4e2;color:#b3261e;border-radius:10px;padding:12px 16px;margin-bottom:14px}
@@ -320,30 +329,38 @@ function webcamLink(){try{const v=localStorage.getItem(WEBCAM_SLEUTEL);return v=
 const ONLINE=/^https?:/.test(location.protocol);
 const ONLINE_URL="https://theovanzoest.github.io/weer/";
 let spelerAan=ONLINE;
+const CAMS=[
+  {id:"paseo",naam:"Strand & boulevard",img:"https://webcam2.meteo365.es/livecams/fglpaseo/current.webp",pagina:"https://meteo365.es/livecams/fuengirola-paseo.php"},
+  {id:"gaviotas",naam:"Playa Las Gaviotas",img:"https://webcam.meteo365.es/livecams/fglplaya/current.webp",pagina:"https://meteo365.es/livecams/fuengirola.php"},
+  {id:"puerto",naam:"Haven & Los Boliches",img:"https://webcam.meteo365.es/livecams/fglpuerto/current.webp",pagina:"https://meteo365.es/livecams/fuengirola-puerto.php"},
+  {id:"bahia",naam:"Baai & kust",img:"https://webcam2.meteo365.es/livecams/fglgaviotas/current.webp",pagina:"https://meteo365.es/livecams/fuengirola-bahia.php"}
+];
+let camKeuze=(()=>{try{return localStorage.getItem(OPSLAG+"-cam")||"paseo";}catch(e){return "paseo";}})();
+let camStempel=Date.now();
+function camSrc(c){return c.img+"?t="+camStempel;}
+function kiesCam(id){camKeuze=id;try{localStorage.setItem(OPSLAG+"-cam",id);}catch(e){}toon();}
+function camFout(el){el.style.display="none";const f=el.parentNode.querySelector(".fout");if(f)f.style.display="flex";}
 function webcamHtml(){
-  const link=webcamLink(),id=ytId(link);
-  let s=`<div class="kaart webcam" id="webcam"><h3>📹 Webcam Fuengirola</h3>`;
-  if(id){
-    s+=spelerAan
-      ?`<div class="speler"><iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
-        <p class="zacht" style="font-size:14px">Ziet u “Fout 153” of een zwart scherm? Dan staat YouTube afspelen binnen dit bestand niet toe – klik dan op “Openen op YouTube”.</p>`
-      :`<a class="voorbeeld" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener" title="Klik om de webcam op YouTube te openen"><img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="Webcam Fuengirola"><span class="play">▶</span></a>`;
-    s+=`<div class="knoppen">
-      <a class="knop primair" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">▶ Openen op YouTube</a>
-      <button onclick="spelerAan=!spelerAan;toon();setTimeout(()=>document.getElementById('webcam').scrollIntoView({behavior:'smooth'}),50)">${spelerAan?"⏹ Speler sluiten":"📺 Probeer hier af te spelen"}</button>
-      <button onclick="wijzigWebcam()">✏️ Andere webcam kiezen</button>
-      ${ONLINE?"":`<a class="knop primair" href="${ONLINE_URL}" target="_blank" rel="noopener">🌐 Webcam bekijken in online versie</a>`}
-    </div>`;
-  }else{
-    s+=`<p>Plak hieronder de link van uw favoriete YouTube-webcam van Fuengirola (bijvoorbeeld <span class="zacht">https://www.youtube.com/watch?v=…</span>).
-      Weet u er nog geen? Klik op “Zoeken op YouTube”, open een livestream die u bevalt en kopieer de link uit de adresbalk.</p>
-      <div class="knoppen"><input id="webcamInvoer" type="text" placeholder="Plak hier de YouTube-link"><button class="primair" onclick="bewaarWebcam()">💾 Bewaren</button></div>`;
-  }
-  s+=`<div class="knoppen">
-      <a class="knop" href="https://www.youtube.com/results?search_query=Fuengirola+live+webcam&sp=EgJAAQ%253D%253D" target="_blank" rel="noopener">🔎 Zoeken op YouTube (live)</a>
-      <a class="knop" href="https://meteo365.es/livecams/fuengirola.php" target="_blank" rel="noopener">📷 Webcam Playa Las Gaviotas</a>
-      <a class="knop" href="https://www.windy.com/webcams/fuengirola" target="_blank" rel="noopener">🌍 Webcams op Windy</a>
-    </div></div>`;
+  const c=CAMS.find(x=>x.id===camKeuze)||CAMS[0];
+  const t=new Date(camStempel).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"});
+  let s=`<div class="kaart webcam" id="webcam"><h3>📹 Webcams Fuengirola – live beeld</h3>
+    <a class="camgroot" href="${c.pagina}" target="_blank" rel="noopener" title="Klik voor de webcampagina van meteo365.es">
+      <img src="${camSrc(c)}" alt="Webcam ${esc(c.naam)}" onerror="camFout(this)">
+      <div class="fout">Deze webcam is op dit moment niet beschikbaar.<br>Kies hieronder een andere webcam.</div>
+      <div class="label"><span>📷 ${esc(c.naam)}</span><span>ververst om ${t} · elke minuut</span></div>
+    </a>
+    <div class="camlijst">${CAMS.map(x=>`<button class="${x.id===c.id?"actief":""}" onclick="kiesCam('${x.id}')" title="${esc(x.naam)}"><img src="${camSrc(x)}" alt="" onerror="this.style.opacity=.2"><span>${esc(x.naam)}</span></button>`).join("")}</div>
+    <p class="zacht" style="font-size:14px;margin:8px 0 0">Live foto's van <a href="https://meteo365.es/livecams/" target="_blank" rel="noopener">meteo365.es</a>. Klik op de grote foto voor hun webcampagina.</p>`;
+  const id=ytId(webcamLink());
+  s+=`<h3 style="margin-top:16px">▶ Bewegend beeld op YouTube</h3>
+    <p class="kl" style="margin:0 0 6px">De eigenaar staat afspelen buiten YouTube niet toe. Tip: druk op YouTube op de toets <b>F</b> (volledig scherm), dan ziet u niets meer van wat eromheen staat. Met <b>Esc</b> gaat u terug.</p>
+    <div class="knoppen">
+      ${id?`<a class="knop primair" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">▶ Livestream openen op YouTube</a>`:""}
+      <button onclick="wijzigWebcam()">✏️ Andere YouTube-link</button>
+      <a class="knop" href="https://www.youtube.com/results?search_query=Fuengirola+live+webcam&sp=EgJAAQ%253D%253D" target="_blank" rel="noopener">🔎 Andere livestreams zoeken</a>
+    </div>
+    ${id?"":`<div class="knoppen"><input id="webcamInvoer" type="text" placeholder="Plak hier een YouTube-link"><button class="primair" onclick="bewaarWebcam()">💾 Bewaren</button></div>`}
+  </div>`;
   return s;
 }
 function bewaarWebcam(){
@@ -353,7 +370,7 @@ function bewaarWebcam(){
   spelerAan=ONLINE;toon();
 }
 function wijzigWebcam(){
-  if(!confirm("Wilt u een andere webcam-link invullen?"))return;
+  if(!confirm("Wilt u een andere YouTube-link invullen?"))return;
   try{localStorage.setItem(WEBCAM_SLEUTEL,"");}catch(e){}
   spelerAan=ONLINE;toon();
 }
@@ -372,6 +389,11 @@ try{const w=localStorage.getItem(OPSLAG+"-weergave");if(w){weergave=w;document.q
 try{const o=localStorage.getItem(OPSLAG);if(o){DATA=JSON.parse(o);toon();}}catch(e){}
 haalAlles(false);
 setInterval(()=>haalAlles(false),30*60*1000);
+setInterval(()=>{if(document.getElementById("webcam")&&!document.hidden){camStempel=Date.now();
+  const c=CAMS.find(x=>x.id===camKeuze)||CAMS[0];const g=document.querySelector(".camgroot img");
+  if(g){const n=new Image();n.onload=()=>{g.src=n.src;g.style.display="";const f=document.querySelector(".camgroot .fout");if(f)f.style.display="none";
+    const l=document.querySelector(".camgroot .label span:last-child");if(l)l.textContent="ververst om "+new Date(camStempel).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})+" · elke minuut";};n.src=camSrc(c);}
+  document.querySelectorAll(".camlijst img").forEach((im,k)=>im.src=camSrc(CAMS[k]));}},60000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){const t=Math.min(...Object.values(DATA).map(d=>d.tijd||0));if(Date.now()-t>15*60*1000)haalAlles(false);}});
 </script>
 </body>
